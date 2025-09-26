@@ -37,9 +37,11 @@ logo:
   height: 100
 lineageSystemDefinitions:
   rsv-a:
-    11: https://pathoplexus.github.io/silo-lineage-hierarchy-definitions/definitions/rsv-a/lineages.yaml
+    1: https://pathoplexus.github.io/silo-lineage-hierarchy-definitions/definitions/rsv-a/lineages.yaml
   rsv-b:
-    11: https://pathoplexus.github.io/silo-lineage-hierarchy-definitions/definitions/rsv-b/lineages.yaml
+    1: https://pathoplexus.github.io/silo-lineage-hierarchy-definitions/definitions/rsv-b/lineages.yaml
+  sars-cov-2:
+    1: https://gist.githubusercontent.com/florianzwagemaker/d4d42cf6a7f0e69de5bb508c246c85bb/raw/03385ab475ce9f20f492a9dcd07e64ba9efd9790/lineage_hierarchy.yaml
 defaultOrganismConfig: &defaultOrganismConfig
   schema: &schema
     loadSequencesAutomatically: true
@@ -710,6 +712,185 @@ organisms:
             sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/measles/P.fasta]]"
           - name: "V"
             sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/measles/V.fasta]]"
+  sars-cov-2:
+    <<: *defaultOrganismConfig
+    schema:
+      <<: *schema
+      organismName: "SARS-CoV-2"
+      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/SARS-CoV-2_scanning_electron_microscope_image.jpg/1109px-SARS-CoV-2_scanning_electron_microscope_image.jpg"
+      linkOuts:
+        - name: "Nextclade"
+          maxNumberOfRecommendedEntries: 100
+          url: "https://clades.nextstrain.org/?input-fasta={{[unalignedNucleotideSequences+rich|fasta]}}&dataset-name=nextstrain/sars-cov-2/wuhan-hu-1/orfs"
+        - name: "Country map"
+          url: "https://mapoplexus.genomium.org/?url={{[metadata]}}"
+        - name: "Phylogeny Viewer"
+          maxNumberOfRecommendedEntries: 50
+          url: "http://florianzwagemaker.github.io/phyloviewer-wasm/?input-fasta={{[alignedNucleotideSequences+rich|fasta]}}&input-metadata={{[metadata|tsv]}}"
+        - name: "Sequence Editor"
+          maxNumberOfRecommendedEntries: 50
+          url: "http://florianzwagemaker.github.io/seqedit-wasm/?input-fasta={{[alignedNucleotideSequences+rich|fasta]}}&metadata-url={{[metadata|tsv]}}&return-url=http://localhost:8079/&organism=sars-cov-2&auth-endpoint=http://localhost:8083/&auth-realm=loculus&auth-client-id=backend-client"
+
+      metadataAdd:
+        - name: clade
+          displayName: Clade
+          type: string
+          order: 50
+          orderOnDetailsPage: 600
+          includeInDownloadsByDefault: true
+          initiallyVisible: true
+          generateIndex: true
+          autocomplete: true
+          preprocessing:
+            inputs: {input: nextclade.clade}
+        - name: clade_name
+          displayName: Clade WHO name
+          type: string
+          orderOnDetailsPage: 620
+          includeInDownloadsByDefault: true
+          initiallyVisible: false
+          generateIndex: true
+          autocomplete: true
+          preprocessing:
+            inputs: {input: nextclade.customNodeAttributes.clade_who}
+        - name: pangoLineage
+          displayName: Pango Lineage
+          type: string
+          order: 60
+          orderOnDetailsPage: 620
+          includeInDownloadsByDefault: true
+          initiallyVisible: true
+          generateIndex: true
+          autocomplete: true
+          preprocessing:
+            inputs: {input: nextclade.customNodeAttributes.Nextclade_pango}
+    website:
+      <<: *website
+      tableColumns:
+        - sampleCollectionDate
+        - SampleID
+        - clade
+        - clade_name
+        - pangoLineage
+        - length
+        - authors
+        - authorAffiliations
+        - geoLocCountry
+        - geoLocAdmin1
+      defaultOrderBy: sampleCollectionDate
+      defaultOrder: descending
+    preprocessing:
+      - <<: *preprocessing
+        configFile:
+          <<: *preprocessingConfigFile
+          nextclade_dataset_name: "nextstrain/sars-cov-2/wuhan-hu-1/orfs"
+          nextclade_dataset_tag: "latest"
+          genes: [ "ORF1a", "ORF1b", "S", "ORF3a", "E", "M", "ORF6", "ORF7a", "ORF7b", "ORF8", "N", "ORF9b" ]
+    referenceGenomes:
+      singleReference:
+        nucleotideSequences:
+          - name: "main"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/reference.fasta]]"
+            insdcAccessionFull: MN908947.3
+        genes:
+          - name: "ORF1a"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/ORF1a.fasta]]"
+          - name: "ORF1b"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/ORF1b.fasta]]"
+          - name: "S"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/S.fasta]]"
+          - name: "ORF3a"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/ORF3a.fasta]]"
+          - name: "E"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/E.fasta]]"
+          - name: "M"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/M.fasta]]"
+          - name: "ORF6"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/ORF6.fasta]]"
+          - name: "ORF7a"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/ORF7a.fasta]]"
+          - name: "ORF7b"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/ORF7b.fasta]]"
+          - name: "ORF8"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/ORF8.fasta]]"
+          - name: "N"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/N.fasta]]"
+          - name: "ORF9b"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/ORF9b.fasta]]"
+
+  mrsa:
+    schema:
+      organismName: "Methicillin-resistant Staphylococcus aureus"
+      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Human_neutrophil_ingesting_MRSA.jpg/800px-Human_neutrophil_ingesting_MRSA.jpg"
+      # linkOuts:
+      #   - name: "AMR overview"
+      #     url: https://florianzwagemaker.github.io/amr-report-viewer/?input-metadata={{[metadata|tsv]}}
+      metadata:
+        - name: date
+          type: date
+          initiallyVisible: true
+          header: "Collection Details"
+          required: true
+          preprocessing:
+            function: parse_and_assert_past_date
+            inputs:
+              date: date
+        - name: region
+          type: string
+          initiallyVisible: true
+          generateIndex: true
+          autocomplete: true
+          header: "Collection Details"
+        - name: country
+          initiallyVisible: true
+          type: string
+          generateIndex: true
+          autocomplete: true
+          header: "Collection Details"
+        - name: division
+          initiallyVisible: true
+          type: string
+          generateIndex: true
+          autocomplete: true
+          header: "Collection Details"
+        - name: host
+          initiallyVisible: true
+          type: string
+          autocomplete: true
+          header: "Collection Details"
+        - name: antimicrobialresistance
+          displayName: Antimicrobial Resistance
+          type: string
+          enableSubstringSearch: true
+          header: "Analysis Results"
+          orderOnDetailsPage: 200
+          includeInDownloadsByDefault: true
+          notSearchable: true
+          hideInSearchResultsTable: true
+
+      website:
+        tableColumns:
+          - country
+          - division
+          - date
+        defaultOrder: descending
+        defaultOrderBy: date
+    preprocessing:
+      - version: 4
+        image: ghcr.io/loculus-project/preprocessing-nextclade
+        args:
+          - "prepro"
+        configFile:
+          log_level: DEBUG
+          genes: []
+          batch_size: 100
+    referenceGenomes:
+      singleReference:
+        nucleotideSequences:
+          - name: "main"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/sars-cov-2/reference.fasta]]"
+        genes: []
+
 auth:
   verifyEmail: false
   resetPasswordAllowed: true
