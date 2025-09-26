@@ -1,0 +1,902 @@
+environment: server
+localHost: localhost
+robotsNoindexHeader: true
+seqSets:
+  enabled: true
+  crossref: null
+  fieldsToDisplay:
+    - field: "sampleCollectionDate"
+      displayName: "Sample Collection Date"
+    - field: "authors"
+      displayName: "Authors"
+disableWebsite: false
+disableBackend: false
+disablePreprocessing: false
+disableIngest: true
+disableEnaSubmission: true
+website:
+  websiteConfig:
+    enableLoginNavigationItem: true
+    enableSubmissionNavigationItem: true
+    enableSubmissionPages: true
+siloImportLimitSeconds: 3600
+ingestLimitSeconds: 1800
+getSubmissionListLimitSeconds: 600
+preprocessingTimeout: 600
+accessionPrefix: "RIVM_"
+dataUseTerms:
+  enabled: false
+fileSharing:
+  outputFileUrlType: backend
+s3:
+  enabled: false
+name: "ViroDB"
+logo:
+  url: "/favicon.svg"
+  width: 100
+  height: 100
+lineageSystemDefinitions:
+  rsv-a:
+    11: https://pathoplexus.github.io/silo-lineage-hierarchy-definitions/definitions/rsv-a/lineages.yaml
+  rsv-b:
+    11: https://pathoplexus.github.io/silo-lineage-hierarchy-definitions/definitions/rsv-b/lineages.yaml
+defaultOrganismConfig: &defaultOrganismConfig
+  schema: &schema
+    loadSequencesAutomatically: true
+    richFastaHeaderFields: ["accessionVersion", "SampleID"]
+    organismName: "RSV-A"
+    image: "https://live.staticflickr.com/65535/52453014887_d938287001_b.jpg"
+    linkOuts:
+      - name: "Nextclade"
+        maxNumberOfRecommendedEntries: 100
+        url: "https://clades.nextstrain.org/?input-fasta={{[unalignedNucleotideSequences+rich|fasta]}}&dataset-name=nextstrain/rsv/a/EPI_ISL_412866"
+      - name: "Country map"
+        url: "https://mapoplexus.genomium.org/?url={{[metadata]}}"
+      - name: "Phylogeny Viewer"
+        maxNumberOfRecommendedEntries: 50
+        url: "http://florianzwagemaker.github.io/phyloviewer-wasm/?input-fasta={{[alignedNucleotideSequences+rich|fasta]}}&input-metadata={{[metadata|tsv]}}"
+      - name: "Sequence Editor"
+        maxNumberOfRecommendedEntries: 50
+        url: "http://florianzwagemaker.github.io/seqedit-wasm/?input-fasta={{[alignedNucleotideSequences+rich|fasta]}}&metadata-url={{[metadata|tsv]}}&return-url=http://localhost:8079/&organism=RSV-A&auth-endpoint=http://localhost:8083/&auth-realm=loculus&auth-client-id=backend-client"
+    metadata:
+      - name: SampleID
+        displayName: ILES Sample ID
+        type: string
+        required: true
+        unique: false
+        enableSubstringSearch: true
+        order: 10
+        orderOnDetailsPage: 200
+        columnWidth: 100
+      - name: totalSnps
+        type: int
+        header: "Alignment and QC metrics"
+        noInput: true
+        rangeSearch: true
+        perSegment: true
+        displayName: Total SNPs
+        orderOnDetailsPage: 2720
+        preprocessing:
+          inputs: {input: nextclade.totalSubstitutions}
+      - name: totalInsertedNucs
+        type: int
+        header: "Alignment and QC metrics"
+        noInput: true
+        rangeSearch: true
+        perSegment: true
+        displayName: Total inserted nucs
+        orderOnDetailsPage: 2740
+        preprocessing:
+          inputs: {input: nextclade.totalInsertions}
+      - name: totalDeletedNucs
+        type: int
+        header: "Alignment and QC metrics"
+        noInput: true
+        rangeSearch: true
+        perSegment: true
+        orderOnDetailsPage: 2760
+        preprocessing:
+          inputs: {input: nextclade.totalDeletions}
+        displayName: Total deleted nucs
+      - name: totalAmbiguousNucs
+        type: int
+        header: "Alignment and QC metrics"
+        noInput: true
+        rangeSearch: true
+        perSegment: true
+        displayName: Total ambiguous nucs
+        orderOnDetailsPage: 2780
+        preprocessing:
+          inputs: {input: "nextclade.totalNonACGTNs"}
+      - name: totalUnknownNucs
+        orderOnDetailsPage: 2800
+        type: int
+        header: "Alignment and QC metrics"
+        noInput: true
+        rangeSearch: true
+        perSegment: true
+        displayName: Total unknown nucs
+        preprocessing:
+          inputs: {input: nextclade.totalMissing}
+      - name: totalFrameShifts
+        type: int
+        rangeSearch: true
+        header: "Alignment and QC metrics"
+        noInput: true
+        perSegment: true
+        displayName: Total frame shifts
+        orderOnDetailsPage: 2820
+        preprocessing:
+          inputs: {input: nextclade.totalFrameShifts}
+      - name: frameShifts
+        header: "Alignment and QC metrics"
+        noInput: true
+        perSegment: true
+        displayName: Frame shifts
+        orderOnDetailsPage: 2840
+        preprocessing:
+          inputs: {input: nextclade.frameShifts}
+      - name: completeness
+        type: float
+        header: "Alignment and QC metrics"
+        noInput: true
+        perSegment: true
+        displayName: Completeness
+        rangeSearch: true
+        orderOnDetailsPage: 2860
+        customDisplay:
+          type: percentage
+        preprocessing:
+          inputs: {input: nextclade.coverage}
+      - name: geoLocLatitude
+        displayName: Latitude
+        header: Sample details
+        type: float
+        orderOnDetailsPage: 420
+        guidance: Geo-coordinate latitude in decimal degree (WGS84) format, i.e. values in range -90 to 90, where positive values are north of the Equator.
+      - name: geoLocLongitude
+        displayName: Longitude
+        header: Sample details
+        type: float
+        orderOnDetailsPage: 440
+        guidance: Geo-coordinate longitude in decimal degree (WGS84) format, i.e. values in range -180 to 180, where positive values are east of the Prime Meridian.
+      - name: geoLocCountry
+        displayName: Collection country
+        generateIndex: true
+        autocomplete: true
+        initiallyVisible: true
+        includeInDownloadsByDefault: true
+        header: Sample details
+        order: 20
+        orderOnDetailsPage: 400
+        ingest: country
+        required: true
+        options:
+          # Taken from https://www.ncbi.nlm.nih.gov/genbank/collab/country/
+          # Alternative, historically not always up-to-date at https://www.insdc.org/submitting-standards/geo_loc_name-qualifier-vocabulary/
+          # If changed, ensure it's mirrored to Pathoplexus
+          # Last check: 2025-05-28
+          # Last update: 2024-09-18
+          - name: Afghanistan
+          - name: Albania
+          - name: Algeria
+          - name: American Samoa
+          - name: Andorra
+          - name: Angola
+          - name: Anguilla
+          - name: Antarctica
+          - name: Antigua and Barbuda
+          - name: Arctic Ocean
+          - name: Argentina
+          - name: Armenia
+          - name: Aruba
+          - name: Ashmore and Cartier Islands
+          - name: Atlantic Ocean
+          - name: Australia
+          - name: Austria
+          - name: Azerbaijan
+          - name: Bahamas
+          - name: Bahrain
+          - name: Baltic Sea
+          - name: Baker Island
+          - name: Bangladesh
+          - name: Barbados
+          - name: Bassas da India
+          - name: Belarus
+          - name: Belgium
+          - name: Belize
+          - name: Benin
+          - name: Bermuda
+          - name: Bhutan
+          - name: Bolivia
+          - name: Borneo
+          - name: Bosnia and Herzegovina
+          - name: Botswana
+          - name: Bouvet Island
+          - name: Brazil
+          - name: British Virgin Islands
+          - name: Brunei
+          - name: Bulgaria
+          - name: Burkina Faso
+          - name: Burundi
+          - name: Cambodia
+          - name: Cameroon
+          - name: Canada
+          - name: Cape Verde
+          - name: Cayman Islands
+          - name: Central African Republic
+          - name: Chad
+          - name: Chile
+          - name: China
+          - name: Christmas Island
+          - name: Clipperton Island
+          - name: Cocos Islands
+          - name: Colombia
+          - name: Comoros
+          - name: Cook Islands
+          - name: Coral Sea Islands
+          - name: Costa Rica
+          - name: Cote d'Ivoire
+          - name: Croatia
+          - name: Cuba
+          - name: Curacao
+          - name: Cyprus
+          - name: Czechia
+          - name: Democratic Republic of the Congo
+          - name: Denmark
+          - name: Djibouti
+          - name: Dominica
+          - name: Dominican Republic
+          - name: Ecuador
+          - name: Egypt
+          - name: El Salvador
+          - name: Equatorial Guinea
+          - name: Eritrea
+          - name: Estonia
+          - name: Eswatini
+          - name: Ethiopia
+          - name: Europa Island
+          - name: Falkland Islands (Islas Malvinas)
+          - name: Faroe Islands
+          - name: Fiji
+          - name: Finland
+          - name: France
+          - name: French Guiana
+          - name: French Polynesia
+          - name: French Southern and Antarctic Lands
+          - name: Gabon
+          - name: Gambia
+          - name: Gaza Strip
+          - name: Georgia
+          - name: Germany
+          - name: Ghana
+          - name: Gibraltar
+          - name: Glorioso Islands
+          - name: Greece
+          - name: Greenland
+          - name: Grenada
+          - name: Guadeloupe
+          - name: Guam
+          - name: Guatemala
+          - name: Guernsey
+          - name: Guinea
+          - name: Guinea-Bissau
+          - name: Guyana
+          - name: Haiti
+          - name: Heard Island and McDonald Islands
+          - name: Honduras
+          - name: Hong Kong
+          - name: Howland Island
+          - name: Hungary
+          - name: Iceland
+          - name: India
+          - name: Indian Ocean
+          - name: Indonesia
+          - name: Iran
+          - name: Iraq
+          - name: Ireland
+          - name: Isle of Man
+          - name: Israel
+          - name: Italy
+          - name: Jamaica
+          - name: Jan Mayen
+          - name: Japan
+          - name: Jarvis Island
+          - name: Jersey
+          - name: Johnston Atoll
+          - name: Jordan
+          - name: Juan de Nova Island
+          - name: Kazakhstan
+          - name: Kenya
+          - name: Kerguelen Archipelago
+          - name: Kingman Reef
+          - name: Kiribati
+          - name: Kosovo
+          - name: Kuwait
+          - name: Kyrgyzstan
+          - name: Laos
+          - name: Latvia
+          - name: Lebanon
+          - name: Lesotho
+          - name: Liberia
+          - name: Libya
+          - name: Liechtenstein
+          - name: Line Islands
+          - name: Lithuania
+          - name: Luxembourg
+          - name: Macau
+          - name: Madagascar
+          - name: Malawi
+          - name: Malaysia
+          - name: Maldives
+          - name: Mali
+          - name: Malta
+          - name: Marshall Islands
+          - name: Martinique
+          - name: Mauritania
+          - name: Mauritius
+          - name: Mayotte
+          - name: Mediterranean Sea
+          - name: Mexico
+          - name: Micronesia, Federated States of
+          - name: Midway Islands
+          - name: Moldova
+          - name: Monaco
+          - name: Mongolia
+          - name: Montenegro
+          - name: Montserrat
+          - name: Morocco
+          - name: Mozambique
+          - name: Myanmar
+          - name: Namibia
+          - name: Nauru
+          - name: Navassa Island
+          - name: Nepal
+          - name: Netherlands
+          - name: New Caledonia
+          - name: New Zealand
+          - name: Nicaragua
+          - name: Niger
+          - name: Nigeria
+          - name: Niue
+          - name: Norfolk Island
+          - name: North Korea
+          - name: North Macedonia
+          - name: North Sea
+          - name: Northern Mariana Islands
+          - name: Norway
+          - name: Oman
+          - name: Pacific Ocean
+          - name: Pakistan
+          - name: Palau
+          - name: Palmyra Atoll
+          - name: Panama
+          - name: Papua New Guinea
+          - name: Paracel Islands
+          - name: Paraguay
+          - name: Peru
+          - name: Philippines
+          - name: Pitcairn Islands
+          - name: Poland
+          - name: Portugal
+          - name: Puerto Rico
+          - name: Qatar
+          - name: Republic of the Congo
+          - name: Reunion
+          - name: Romania
+          - name: Ross Sea
+          - name: Russia
+          - name: Rwanda
+          - name: Saint Barthelemy
+          - name: Saint Helena
+          - name: Saint Kitts and Nevis
+          - name: Saint Lucia
+          - name: Saint Martin
+          - name: Saint Pierre and Miquelon
+          - name: Saint Vincent and the Grenadines
+          - name: Samoa
+          - name: San Marino
+          - name: Sao Tome and Principe
+          - name: Saudi Arabia
+          - name: Senegal
+          - name: Serbia
+          - name: Seychelles
+          - name: Sierra Leone
+          - name: Singapore
+          - name: Sint Maarten
+          - name: Slovakia
+          - name: Slovenia
+          - name: Solomon Islands
+          - name: Somalia
+          - name: South Africa
+          - name: South Georgia and the South Sandwich Islands
+          - name: South Korea
+          - name: South Sudan
+          - name: Southern Ocean
+          - name: Spain
+          - name: Spratly Islands
+          - name: Sri Lanka
+          - name: State of Palestine
+          - name: Sudan
+          - name: Suriname
+          - name: Svalbard
+          - name: Sweden
+          - name: Switzerland
+          - name: Syria
+          - name: Taiwan
+          - name: Tajikistan
+          - name: Tanzania
+          - name: Tasman Sea
+          - name: Thailand
+          - name: Timor-Leste
+          - name: Togo
+          - name: Tokelau
+          - name: Tonga
+          - name: Trinidad and Tobago
+          - name: Tromelin Island
+          - name: Tunisia
+          - name: Turkey
+          - name: Turkmenistan
+          - name: Turks and Caicos Islands
+          - name: Tuvalu
+          - name: Uganda
+          - name: Ukraine
+          - name: United Arab Emirates
+          - name: United Kingdom
+          - name: Uruguay
+          - name: USA
+          - name: Uzbekistan
+          - name: Vanuatu
+          - name: Venezuela
+          - name: Viet Nam
+          - name: Virgin Islands
+          - name: Wake Island
+          - name: Wallis and Futuna
+          - name: West Bank
+          - name: Western Sahara
+          - name: Yemen
+          - name: Zambia
+          - name: Zimbabwe
+          # Historical Countries in NIH
+          - name: Belgian Congo
+          - name: British Guiana
+          - name: Burma
+          - name: Czechoslovakia
+          - name: Czech Republic
+          - name: East Timor
+          - name: Korea
+          - name: Macedonia
+          - name: Micronesia
+          - name: Netherlands Antilles
+          - name: Serbia and Montenegro
+          - name: Siam
+          - name: Swaziland
+          - name: The former Yugoslav Republic of Macedonia
+          - name: USSR
+          - name: Yugoslavia
+          - name: Zaire
+        preprocessing:
+          function: process_options
+          inputs:
+            input: geoLocCountry
+      - name: geoLocAdmin1
+        displayName: Collection subdivision level 1
+        desired: true
+        generateIndex: true
+        autocomplete: true
+        initiallyVisible: true
+        header: Sample details
+        order: 30
+        orderOnDetailsPage: 460
+        ingest: division
+      - name: geoLocAdmin2
+        displayName: Collection subdivision level 2
+        desired: true
+        generateIndex: true
+        autocomplete: true
+        header: Sample details
+        orderOnDetailsPage: 480
+      - name: geoLocCity
+        displayName: Collection city
+        desired: true
+        generateIndex: true
+        autocomplete: true
+        header: Sample details
+        orderOnDetailsPage: 500
+      - name: geoLocSite
+        ontology_id: GENEPIO:0100436
+        definition: The name of a specific geographical location e.g. Credit River (rather than river).
+        guidance: Provide the name of the specific geographical site using a specific noun (a word that names a certain place, thing).
+        example: Credit River
+        displayName: Collection site
+        header: Sample details
+        orderOnDetailsPage: 520
+      - name: specimenCollectorSampleId
+        displayName: Isolate name
+        desired: true
+        header: Sample details
+        ingest: ncbiIsolateName
+        enableSubstringSearch: true
+        orderOnDetailsPage: 600
+      - name: authors
+        displayName: Authors
+        type: authors
+        header: Authors
+        desired: true
+        enableSubstringSearch: true
+        order: 40
+        orderOnDetailsPage: 800
+        includeInDownloadsByDefault: true
+        preprocessing:
+          function: check_authors
+          inputs:
+            authors: authors
+        columnWidth: 140
+      - name: authorAffiliations
+        displayName: Author affiliations
+        desired: true
+        enableSubstringSearch: true
+        header: Authors
+        includeInDownloadsByDefault: true
+        orderOnDetailsPage: 820
+    website: &website
+      tableColumns:
+        - sampleCollectionDate
+        - authors
+        - authorAffiliations
+        - geoLocCountry
+        - geoLocAdmin1
+      defaultOrderBy: sampleCollectionDate
+      defaultOrder: descending
+    extraInputFields: []
+  preprocessing:
+    - &preprocessing
+      version: 1
+      image: ghcr.io/loculus-project/preprocessing-nextclade
+      args:
+        - "prepro"
+      replicas: 1
+      configFile: &preprocessingConfigFile
+        log_level: DEBUG
+        genes: []
+        batch_size: 100
+        create_embl_file: false
+  ingest: &ingest
+    image: ghcr.io/loculus-project/ingest
+    configFile: &ingestConfigFile
+      taxon_id: 1868215
+
+  referenceGenomes:
+    singleReference:
+      nucleotideSequences:
+        - name: "main"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/reference.fasta]]"
+          insdcAccessionFull: PP109421.1
+      genes:
+        - name: "F"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/F.fasta]]"
+        - name: "G"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/G.fasta]]"
+        - name: "L"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/L.fasta]]"
+        - name: "M"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/M.fasta]]"
+        - name: "M2-1"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/M2-1.fasta]]"
+        - name: "M2-2"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/M2-2.fasta]]"
+        - name: "N"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/N.fasta]]"
+        - name: "NS1"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/NS1.fasta]]"
+        - name: "NS2"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/NS2.fasta]]"
+        - name: "P"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/P.fasta]]"
+        - name: "SH"
+          sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/SH.fasta]]"
+organisms:
+  rsv-a:
+    <<: *defaultOrganismConfig
+    preprocessing:
+      - <<: *preprocessing
+        configFile:
+          <<: *preprocessingConfigFile
+          nextclade_dataset_name: "nextstrain/rsv/a/EPI_ISL_412866"
+          nextclade_dataset_tag: "2024-11-27--02-51-00Z"
+          require_nextclade_sort_match: true
+          minimizer_url: "https://loculus-project.github.io/nextclade-sort-minimizers/data/rsv/minimizer.json"
+          accepted_dataset_matches: 
+            - rsv-a
+          genes: [ "F", "G", "L", "M", "M2-1", "M2-2", "N", "NS1", "NS2", "P", "SH" ]
+    referenceGenomes:
+      singleReference:
+        nucleotideSequences:
+          - name: "main"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/reference.fasta]]"
+            insdcAccessionFull: PP109421.1
+        genes:
+          - name: "F"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/F.fasta]]"
+          - name: "G"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/G.fasta]]"
+          - name: "L"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/L.fasta]]"
+          - name: "M"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/M.fasta]]"
+          - name: "M2-1"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/M2-1.fasta]]"
+          - name: "M2-2"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/M2-2.fasta]]"
+          - name: "N"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/N.fasta]]"
+          - name: "NS1"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/NS1.fasta]]"
+          - name: "NS2"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/NS2.fasta]]"
+          - name: "P"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/P.fasta]]"
+          - name: "SH"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/SH.fasta]]"
+  measles:
+    <<: *defaultOrganismConfig
+    schema:
+      <<: *schema
+      organismName: "Measles virus"
+      image: "https://upload.wikimedia.org/wikipedia/commons/6/62/Measles_virus.JPG"
+      linkOuts:
+        - name: "NextClade"
+          maxNumberOfRecommendedEntries: 100
+          url: "https://clades.nextstrain.org/?input-fasta={{[unalignedNucleotideSequences+rich|fasta]}}&dataset-name=nextstrain/measles/genome/WHO-2012"
+        - name: "Sequence Editor"
+          maxNumberOfRecommendedEntries: 50
+          url: "http://florianzwagemaker.github.io/seqedit-wasm/?input-fasta={{[alignedNucleotideSequences+rich|fasta]}}&metadata-url={{[metadata|tsv]}}&return-url=http://localhost:8079/&organism=measles&auth-endpoint=http://localhost:8083/&auth-realm=loculus&auth-client-id=backend-client"
+        - name: "Phylogeny Viewer"
+          maxNumberOfRecommendedEntries: 50
+          url: "http://florianzwagemaker.github.io/phyloviewer-wasm/?input-fasta={{[alignedNucleotideSequences+rich|fasta]}}&input-metadata={{[metadata|tsv]}}"
+
+      metadataAdd:
+        - name: genotype
+          displayName: Genotype
+          type: string
+          order: 50
+          orderOnDetailsPage: 600
+          includeInDownloadsByDefault: true
+          initiallyVisible: true
+          generateIndex: true
+          autocomplete: true
+          preprocessing:
+            inputs: {input: nextclade.clade}
+    website:
+      <<: *website
+      tableColumns:
+        - sampleCollectionDate
+        - SampleID
+        - genotype
+        - length
+        - authors
+        - authorAffiliations
+        - geoLocCountry
+        - geoLocAdmin1
+      defaultOrderBy: sampleCollectionDate
+      defaultOrder: descending
+    preprocessing:
+      - <<: *preprocessing
+        configFile:
+          <<: *preprocessingConfigFile
+          nextclade_dataset_name: "nextstrain/measles/genome/WHO-2012"
+          nextclade_dataset_tag: "2025-08-11--19-06-01Z"
+          genes: [ "C", "F", "H", "L", "M", "N", "P", "V" ]
+    referenceGenomes:
+      singleReference:
+        nucleotideSequences:
+          - name: "main"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/measles/reference.fasta]]"
+            insdcAccessionFull: NC_001498.1
+        genes:
+          - name: "C"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/measles/C.fasta]]"
+          - name: "F"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/measles/F.fasta]]"
+          - name: "H"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/measles/H.fasta]]"
+          - name: "L"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/measles/L.fasta]]"
+          - name: "M"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/measles/M.fasta]]"
+          - name: "N"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/measles/N.fasta]]"
+          - name: "P"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/measles/P.fasta]]"
+          - name: "V"
+            sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/measles/V.fasta]]"
+auth:
+  verifyEmail: false
+  resetPasswordAllowed: true
+  registrationAllowed: true
+insecureCookies: false
+bannerMessage: "This is a demonstration environment. It may contain non-accurate test data and should not be used for real-world applications. Data will be deleted regularly."
+welcomeMessageHTML: null
+additionalHeadHTML: ""
+images:
+  lapisSilo:
+    repository: "ghcr.io/genspectrum/lapis-silo"
+    tag: "0.7.10"
+    pullPolicy: IfNotPresent
+  lapis:
+    repository: "ghcr.io/genspectrum/lapis"
+    tag: "0.5.11"
+    pullPolicy: IfNotPresent
+  website:
+    repository: "ghcr.io/loculus-project/website"
+    pullPolicy: Always
+  backend:
+    repository: "ghcr.io/loculus-project/backend"
+    pullPolicy: Always
+secrets:
+  smtp-password:
+    type: raw
+    data:
+      secretKey: not_configured
+  backend-keycloak-client-secret:
+    type: autogen
+    data:
+      backendKeycloakClientSecret: ""
+  database:
+    type: raw
+    data:
+      url: "jdbc:postgresql://loculus-database-service/loculus"
+      username: "postgres"
+      password: "password"
+  keycloak-database:
+    type: raw
+    data:
+      addr: "loculus-keycloak-database-service"
+      database: "keycloak"
+      username: "postgres"
+      password: "unsecure"
+      port: "5432"
+  crossref:
+    type: raw
+    data:
+      username: "dummy"
+      password: "dummy"
+  service-accounts:
+    type: autogen
+    data:
+      insdcIngestUserPassword: ""
+      preprocessingPipelinePassword: ""
+      externalMetadataUpdaterPassword: ""
+      backendUserPassword: ""
+  keycloak-admin:
+    type: raw
+    data:
+      initialAdminPassword: "admin"
+  orcid:
+    type: raw
+    data:
+      orcidSecret: "dummy"
+  ingest-ncbi:
+    type: raw
+    data:
+      api-key: "dummy"
+  slack-notifications:
+    type: raw
+    data:
+      slack-hook: "dummy"
+      slack-token: "dummy"
+      slack-channel-id: "dummy"
+  ena-submission:
+    type: raw
+    data:
+      username: "dummy"
+      password: "dummy"
+  s3-bucket:
+    type: raw
+    data:
+      accessKey: "dummyAccessKey"
+      secretKey: "dummySecretKey"
+runDevelopmentKeycloakDatabase: true
+runDevelopmentMainDatabase: true
+runDevelopmentS3: true
+developmentDatabasePersistence: false
+enforceHTTPS: true
+registrationTermsMessage: >
+  You must agree to the <a href="http://main.loculus.org/terms">terms of use</a>.
+
+enaDeposition: 
+  submitToEnaProduction: false
+  enaDbName: Loculus
+  enaUniqueSuffix: Loculus
+  enaIsBroker: False
+subdomainSeparator: "-"
+replicas:
+  website: 1
+  backend: 1
+  lapis: 1
+gitHubEditLink: "https://github.com/loculus-project/loculus/edit/main/monorepo/website/"
+gitHubMainUrl: https://github.com/loculus-project/loculus
+resources:
+  website:
+    requests:
+      memory: "200Mi"
+      cpu: "100m"
+    limits:
+      memory: "1Gi"
+  docs:
+    requests:
+      memory: "100Mi"
+      cpu: "10m"
+    limits:
+      memory: "1Gi"
+  ena-submission:
+    requests:
+      memory: "200Mi"
+      cpu: "10m"
+    limits:
+      memory: "10Gi"
+  ena-submission-list-cronjob:
+    requests:
+      memory: "80Mi"
+      cpu: "10m"
+    limits:
+      memory: "10Gi"
+  ingest:
+    requests:
+      memory: "200Mi"
+      cpu: "200m"
+    limits:
+      cpu: "1"
+      memory: "10Gi"
+  keycloak:
+    requests:
+      memory: "700Mi"
+      cpu: "40m"
+    limits:
+      memory: "3Gi"
+  silo:
+    requests:
+      memory: "200Mi"
+      cpu: "20m"
+    limits:
+      memory: "10Gi"
+  lapis:
+    requests:
+      memory: "500Mi"
+      cpu: "100m"
+    limits:
+      memory: "5Gi"
+  silo-preprocessing:
+    requests:
+      memory: "20Mi"
+      cpu: "20m"
+    limits:
+      memory: "10Gi"
+  backend:
+    requests:
+      memory: "700Mi"
+      cpu: "200m"
+    limits:
+      memory: "3Gi"
+  preprocessing:
+    requests:
+      memory: "300Mi"
+      cpu: "50m"
+    limits:
+      memory: "3Gi"
+  minio:
+    requests:
+      memory: "400Mi"
+      cpu: "10m"
+    limits:
+      memory: "1Gi"
+defaultResources:
+  requests:
+    memory: "200Mi"
+    cpu: "20m"
+  limits:
+    memory: "1Gi"
+    cpu: "20m"
+ingest:
+  ncbiGatewayUrl: null
+  mirrorBucket: null
