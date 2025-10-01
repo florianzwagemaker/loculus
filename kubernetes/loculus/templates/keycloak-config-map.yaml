@@ -261,7 +261,8 @@ data:
             "http://{{$.Values.host}}/*",
             "http://localhost:3000/*",
             "http://localhost:9000/*",
-            "https://florianzwagemaker.github.io/seqedit-wasm/*"
+            "https://florianzwagemaker.github.io/seqedit-wasm/*",
+            "https://florianzwagemaker.github.io/metadata_table_editor/*",
           ]
         },
         {
