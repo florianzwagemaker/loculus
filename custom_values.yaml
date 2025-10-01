@@ -60,6 +60,9 @@ defaultOrganismConfig: &defaultOrganismConfig
       - name: "Sequence Editor"
         maxNumberOfRecommendedEntries: 50
         url: "http://florianzwagemaker.github.io/seqedit-wasm/?input-fasta={{[alignedNucleotideSequences+rich|fasta]}}&metadata-url={{[metadata|tsv]}}&return-url=http://localhost:8079/&organism=RSV-A&auth-endpoint=http://localhost:8083/&auth-realm=loculus&auth-client-id=backend-client"
+      - name: "Bulk Metadata Editor"
+        maxNumberOfRecommendedEntries: 100
+        url: "https://florianzwagemaker.github.io/metadata_table_editor/?input-metadata={{[metadata|tsv]}}&input-fasta={{[unalignedNucleotideSequences+rich|fasta]}}&return-url=http://localhost:8079/&organism=RSV-A&auth-endpoint=http://localhost:8083/&auth-realm=loculus&auth-client-id=backend-client"
     metadata:
       - name: SampleID
         displayName: ILES Sample ID
@@ -67,6 +70,8 @@ defaultOrganismConfig: &defaultOrganismConfig
         required: true
         unique: false
         enableSubstringSearch: true
+        initiallyVisible: true
+        includeInDownloadsByDefault: true
         order: 10
         orderOnDetailsPage: 200
         columnWidth: 100
@@ -145,6 +150,7 @@ defaultOrganismConfig: &defaultOrganismConfig
         perSegment: true
         displayName: Completeness
         rangeSearch: true
+        order: 80
         orderOnDetailsPage: 2860
         customDisplay:
           type: percentage
@@ -169,7 +175,7 @@ defaultOrganismConfig: &defaultOrganismConfig
         initiallyVisible: true
         includeInDownloadsByDefault: true
         header: Sample details
-        order: 20
+        # order: 20
         orderOnDetailsPage: 400
         ingest: country
         required: true
@@ -488,7 +494,7 @@ defaultOrganismConfig: &defaultOrganismConfig
         autocomplete: true
         initiallyVisible: true
         header: Sample details
-        order: 30
+        # order: 30
         orderOnDetailsPage: 460
         ingest: division
       - name: geoLocAdmin2
@@ -526,7 +532,7 @@ defaultOrganismConfig: &defaultOrganismConfig
         header: Authors
         desired: true
         enableSubstringSearch: true
-        order: 40
+        # order: 40
         orderOnDetailsPage: 800
         includeInDownloadsByDefault: true
         preprocessing:
@@ -543,12 +549,8 @@ defaultOrganismConfig: &defaultOrganismConfig
         orderOnDetailsPage: 820
     website: &website
       tableColumns:
-        - sampleCollectionDate
-        - authors
-        - authorAffiliations
-        - geoLocCountry
-        - geoLocAdmin1
-      defaultOrderBy: sampleCollectionDate
+        - SampleID
+      defaultOrderBy: SampleID
       defaultOrder: descending
     extraInputFields: []
   preprocessing:
@@ -600,6 +602,18 @@ defaultOrganismConfig: &defaultOrganismConfig
 organisms:
   rsv-a:
     <<: *defaultOrganismConfig
+    schema:
+      <<: *schema
+      website:
+        <<: *website
+        tableColumns:
+          - SampleID
+          - geoLocCountry
+          - geoLocAdmin1
+          - completeness
+          - totalSnps
+          - authors
+          - authorAffiliations
     preprocessing:
       - <<: *preprocessing
         configFile:
@@ -641,7 +655,6 @@ organisms:
           - name: "SH"
             sequence: "[[URL:https://corneliusroemer.github.io/seqs/artefacts/rsv-a/SH.fasta]]"
   measles:
-    <<: *defaultOrganismConfig
     schema:
       <<: *schema
       organismName: "Measles virus"
@@ -656,12 +669,15 @@ organisms:
         - name: "Phylogeny Viewer"
           maxNumberOfRecommendedEntries: 50
           url: "http://florianzwagemaker.github.io/phyloviewer-wasm/?input-fasta={{[alignedNucleotideSequences+rich|fasta]}}&input-metadata={{[metadata|tsv]}}"
+        - name: "Bulk Metadata Editor"
+          maxNumberOfRecommendedEntries: 100
+          url: "https://florianzwagemaker.github.io/metadata_table_editor/?input-metadata={{[metadata|tsv]}}&input-fasta={{[unalignedNucleotideSequences+rich|fasta]}}&return-url=http://localhost:8079/&organism=measles&auth-endpoint=http://localhost:8083/&auth-realm=loculus&auth-client-id=backend-client"
 
       metadataAdd:
         - name: genotype
           displayName: Genotype
           type: string
-          order: 50
+          order: 20
           orderOnDetailsPage: 600
           includeInDownloadsByDefault: true
           initiallyVisible: true
@@ -669,19 +685,16 @@ organisms:
           autocomplete: true
           preprocessing:
             inputs: {input: nextclade.clade}
-    website:
-      <<: *website
-      tableColumns:
-        - sampleCollectionDate
-        - SampleID
-        - genotype
-        - length
-        - authors
-        - authorAffiliations
-        - geoLocCountry
-        - geoLocAdmin1
-      defaultOrderBy: sampleCollectionDate
-      defaultOrder: descending
+      website:
+        <<: *website
+        tableColumns:
+          - SampleID
+          - genotype
+          - completeness
+          - authors
+          - authorAffiliations
+          - geoLocCountry
+          - geoLocAdmin1
     preprocessing:
       - <<: *preprocessing
         configFile:
@@ -730,23 +743,29 @@ organisms:
         - name: "Sequence Editor"
           maxNumberOfRecommendedEntries: 50
           url: "http://florianzwagemaker.github.io/seqedit-wasm/?input-fasta={{[alignedNucleotideSequences+rich|fasta]}}&metadata-url={{[metadata|tsv]}}&return-url=http://localhost:8079/&organism=sars-cov-2&auth-endpoint=http://localhost:8083/&auth-realm=loculus&auth-client-id=backend-client"
+        - name: "Bulk Metadata Editor"
+          maxNumberOfRecommendedEntries: 100
+          url: "https://florianzwagemaker.github.io/metadata_table_editor/?input-metadata={{[metadata|tsv]}}&input-fasta={{[unalignedNucleotideSequences+rich|fasta]}}&return-url=http://localhost:8079/&organism=sars-cov-2&auth-endpoint=http://localhost:8083/&auth-realm=loculus&auth-client-id=backend-client"
 
       metadataAdd:
         - name: clade
           displayName: Clade
           type: string
-          order: 50
-          orderOnDetailsPage: 600
+          noInput: true
+          order: 30
+          # orderOnDetailsPage: 600
           includeInDownloadsByDefault: true
           initiallyVisible: true
           generateIndex: true
           autocomplete: true
           preprocessing:
             inputs: {input: nextclade.clade}
-        - name: clade_name
+        - name: cladeName
           displayName: Clade WHO name
           type: string
-          orderOnDetailsPage: 620
+          noInput: true
+          order: 40
+          # orderOnDetailsPage: 620
           includeInDownloadsByDefault: true
           initiallyVisible: false
           generateIndex: true
@@ -756,29 +775,24 @@ organisms:
         - name: pangoLineage
           displayName: Pango Lineage
           type: string
-          order: 60
-          orderOnDetailsPage: 620
+          noInput: true
+          order: 20
+          # orderOnDetailsPage: 620
           includeInDownloadsByDefault: true
           initiallyVisible: true
           generateIndex: true
           autocomplete: true
           preprocessing:
             inputs: {input: nextclade.customNodeAttributes.Nextclade_pango}
-    website:
-      <<: *website
-      tableColumns:
-        - sampleCollectionDate
-        - SampleID
-        - clade
-        - clade_name
-        - pangoLineage
-        - length
-        - authors
-        - authorAffiliations
-        - geoLocCountry
-        - geoLocAdmin1
-      defaultOrderBy: sampleCollectionDate
-      defaultOrder: descending
+      website:
+        <<: *website
+        tableColumns:
+          - SampleID
+          - clade
+          - cladeName
+          - pangoLineage
+          - completeness
+          - geoLocAdmin1
     preprocessing:
       - <<: *preprocessing
         configFile:
@@ -822,59 +836,218 @@ organisms:
     schema:
       organismName: "Methicillin-resistant Staphylococcus aureus"
       image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Human_neutrophil_ingesting_MRSA.jpg/800px-Human_neutrophil_ingesting_MRSA.jpg"
-      # linkOuts:
-      #   - name: "AMR overview"
-      #     url: https://florianzwagemaker.github.io/amr-report-viewer/?input-metadata={{[metadata|tsv]}}
+      linkOuts:
+        - name: "SeqDB phylogenetic tree viewer"
+          url: "https://florianzwagemaker.github.io/phyloviewer-seqdbprovider/?input-metadata={{[metadata|tsv]}}&tree-endpoint=https://localhost:8000"
+        - name: "Bulk Metadata Editor"
+          maxNumberOfRecommendedEntries: 100
+          url: "https://florianzwagemaker.github.io/metadata_table_editor/?input-metadata={{[metadata|tsv]}}&input-fasta={{[unalignedNucleotideSequences+rich|fasta]}}&return-url=http://localhost:8079/&organism=mrsa&auth-endpoint=http://localhost:8083/&auth-realm=loculus&auth-client-id=backend-client"
+
       metadata:
-        - name: date
+        - name: SampleID
+          displayName: Sample ID
+          type: string
+          header: "Sample Details"
+          required: true
+          enableSubstringSearch: true
+          initiallyVisible: true
+          includeInDownloadsByDefault: true
+          order: 10
+          orderOnDetailsPage: 100
+        - name: case_date
+          displayName: Case date
           type: date
           initiallyVisible: true
           header: "Collection Details"
           required: true
+          order: 30
           preprocessing:
             function: parse_and_assert_past_date
             inputs:
-              date: date
-        - name: region
-          type: string
-          initiallyVisible: true
-          generateIndex: true
-          autocomplete: true
+              date: case_date
+        - name: sampling_date
+          displayName: Sampling date
+          type: date
+          initiallyVisible: false
           header: "Collection Details"
-        - name: country
-          initiallyVisible: true
-          type: string
-          generateIndex: true
-          autocomplete: true
-          header: "Collection Details"
-        - name: division
-          initiallyVisible: true
-          type: string
-          generateIndex: true
-          autocomplete: true
-          header: "Collection Details"
-        - name: host
-          initiallyVisible: true
-          type: string
-          autocomplete: true
-          header: "Collection Details"
-        - name: antimicrobialresistance
-          displayName: Antimicrobial Resistance
-          type: string
+          order: 20
+          preprocessing:
+            function: parse_and_assert_past_date
+            inputs:
+              date: sampling_date
+        - name: host_age
+          displayName: Host age
+          type: int
+          header: "Host Details"
           enableSubstringSearch: true
-          header: "Analysis Results"
-          orderOnDetailsPage: 200
+          orderOnDetailsPage: 300
           includeInDownloadsByDefault: true
-          notSearchable: true
-          hideInSearchResultsTable: true
+        - name: host_residence_ggd_region
+          displayName: Host residence GGD region
+          type: string
+          generateIndex: true
+          autocomplete: true
+          header: "Host Details"
+          orderOnDetailsPage: 320
+          order: 110
+        - name: symptom_impetigo
+          displayName: Symptom impetigo
+          type: boolean
+          header: "Host Details"
+          orderOnDetailsPage: 340
+          order: 50
+        - name: host_carriage
+          displayName: Host carriage
+          type: boolean
+          header: "Host Details"
+          orderOnDetailsPage: 360
+        - name: transmission_nosocomial
+          displayName: Transmission nosocomial
+          type: boolean
+          header: "Host Details"
+          orderOnDetailsPage: 380
+          order: 60
+        - name: phenotype_amr_resistant
+          displayName: Phenotype AMR resistant
+          type: boolean
+          header: "Treatment Details"
+          orderOnDetailsPage: 400
+          order: 70
+        - name: phenotype_amr_sensitive
+          displayName: Phenotype AMR sensitive
+          type: boolean
+          header: "Treatment Details"
+          orderOnDetailsPage: 420
+          order: 80
+        - name: phenotype_amr_not_tested
+          displayName: Phenotype AMR not tested
+          type: boolean
+          header: "Treatment Details"
+          orderOnDetailsPage: 440
+          order: 90
+        - name: vancomycin_resistance_details
+          displayName: vancomycin resistance details
+          type: string
+          header: "AMR Details"
+          orderOnDetailsPage: 460
+          order: 100
+          includeInDownloadsByDefault: true
+          generateIndex: true
+          options:
+            - name: "R"
+            - name: "I"
+            - name: "S"
+          preprocessing:
+            function: process_options
+            inputs:
+              input: vancomycin_resistance_details
+        - name: linezolid_resistance_details
+          displayName: linezolid resistance details
+          type: string
+          header: "AMR Details"
+          orderOnDetailsPage: 480
+          order: 101
+          includeInDownloadsByDefault: true
+          generateIndex: true
+          options:
+            - name: "R"
+            - name: "I"
+            - name: "S"
+          preprocessing:
+            function: process_options
+            inputs:
+              input: linezolid_resistance_details
+        - name: daptomycin_resistance_details
+          displayName: daptomycin resistance details
+          type: string
+          header: "AMR Details"
+          orderOnDetailsPage: 500
+          order: 102
+          generateIndex: true
+          options:
+            - name: "R"
+            - name: "I"
+            - name: "S"
+          preprocessing:
+            function: process_options
+            inputs:
+              input: daptomycin_resistance_details
+        - name: clindamycin_resistance_details
+          displayName: clindamycin resistance details
+          type: string
+          header: "AMR Details"
+          orderOnDetailsPage: 520
+          order: 103
+          includeInDownloadsByDefault: true
+          generateIndex: true
+          options:
+            - name: "R"
+            - name: "I"
+            - name: "S"
+          preprocessing:
+            function: process_options
+            inputs:
+              input: clindamycin_resistance_details
+        - name: genepresence_locus_fusC
+          displayName: Gene presence locus fusC
+          type: boolean
+          header: "Genomic Details"
+          orderOnDetailsPage: 500
+          order: 120
+        - name: genepresence_locus_mecA
+          displayName: Gene presence locus mecA
+          type: boolean
+          header: "Genomic Details"
+          orderOnDetailsPage: 520
+          order: 130
+        - name: genepresence_locus_mecC 
+          displayName: Gene presence locus mecC
+          type: boolean
+          header: "Genomic Details"
+          orderOnDetailsPage: 540
+          order: 140
+        - name: genepresence_locus_gyrA_S84
+          displayName: Gene presence locus gyrA S84
+          type: boolean
+          header: "Genomic Details"
+          orderOnDetailsPage: 560
+          order: 150
+        - name: genepresence_locus_gyrA_S80
+          displayName: Gene presence locus gyrA S80
+          type: boolean
+          header: "Genomic Details"
+          orderOnDetailsPage: 580
+          order: 160
+        - name: seqdb_genome_identifier
+          displayName: SeqDB genome identifier
+          type: string
+          enableSubstringSearch: false
+          header: "Genomic Details"
+          orderOnDetailsPage: 600
+          includeInDownloadsByDefault: true
 
       website:
         tableColumns:
-          - country
-          - division
-          - date
+          - SampleID
+          - case_date
+          - sampling_date
+          - symptom_impetigo
+          - transmission_nosocomial
+          - phenotype_amr_resistant
+          - phenotype_amr_sensitive
+          - phenotype_amr_not_tested
+          - vancomycin_resistance_details
+          - linezolid_resistance_details
+          - daptomycin_resistance_details
+          - clindamycin_resistance_details
+          - genepresence_locus_fusC
+          - genepresence_locus_mecA
+          - genepresence_locus_mecC
+          - genepresence_locus_gyrA_S84
+          - genepresence_locus_gyrA_S80
+          - host_residence_ggd_region
         defaultOrder: descending
-        defaultOrderBy: date
+        defaultOrderBy: sampling_date
     preprocessing:
       - version: 4
         image: ghcr.io/loculus-project/preprocessing-nextclade
