@@ -25,9 +25,11 @@ spec:
         component: keycloak-database
     spec:
       {{- include "loculus.podScheduling" . | nindent 6 }}
+      {{- include "loculus.podSecurityContext" (dict "componentName" "keycloak-database" "Values" .Values) | nindent 6 }}
       containers:
         - name: loculus-keycloak-database
           image: postgres:15.12
+          {{- include "loculus.containerSecurityContext" (dict "componentName" "keycloak-database" "Values" .Values) | nindent 10 }}
           resources:
             requests:
               memory: "30Mi"

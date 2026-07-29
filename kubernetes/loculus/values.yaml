@@ -7,6 +7,79 @@ podScheduling:
   tolerations: []
   affinity: {}
 
+# Pod and container security contexts for Kubernetes security compliance
+# These can be set globally for all pods/containers, or per-component for fine-grained control
+# By default, all values are unset, ensuring zero breaking change to existing deployments
+securityContext: {}
+  # pod:
+  #   runAsNonRoot: true
+  #   runAsUser: 1000
+  #   runAsGroup: 1000
+  #   fsGroup: 1000
+  #   seccompProfile:
+  #     type: RuntimeDefault
+  # container:
+  #   allowPrivilegeEscalation: false
+  #   capabilities:
+  #     drop:
+  #       - ALL
+  #   readOnlyRootFilesystem: true
+  # components:
+  #   backend:
+  #     pod: {}
+  #     container: {}
+  #   website:
+  #     pod: {}
+  #     container: {}
+  #   keycloak:
+  #     pod: {}
+  #     container: {}
+  #   silo:
+  #     pod: {}
+  #     container: {}
+  #   lapis:
+  #     pod: {}
+  #     container: {}
+  #   silo-importer:
+  #     pod: {}
+  #     container: {}
+  #   preprocessing:
+  #     pod: {}
+  #     container: {}
+  #   ena-submission:
+  #     pod: {}
+  #     container: {}
+  #   ena-submission-list-cronjob:
+  #     pod: {}
+  #     container: {}
+  #   ingest:
+  #     pod: {}
+  #     container: {}
+  #   ingest-init:
+  #     pod: {}
+  #     container: {}
+  #   ingest-trigger:
+  #     pod: {}
+  #     container: {}
+  #   taxonomy-service:
+  #     pod: {}
+  #     container: {}
+  #   autoapprove:
+  #     pod: {}
+  #     container: {}
+  #   docs:
+  #     pod: {}
+  #     container: {}
+  #   minio:
+  #     pod: {}
+  #     container: {}
+  #   keycloak-database:
+  #     pod: {}
+  #     container: {}
+  #   database:
+  #     pod: {}
+  #     container: {}
+
 localHost: localhost
 robotsNoindexHeader: false
 seqSets:

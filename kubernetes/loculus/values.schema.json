@@ -1191,6 +1191,45 @@
         }
       }
     },
+    "securityContext": {
+      "groups": ["general"],
+      "type": "object",
+      "description": "Pod and container security context configurations. Supports both global defaults and per-component overrides. All values default to empty/unset for zero breaking change to existing deployments.",
+      "default": {},
+      "additionalProperties": false,
+      "properties": {
+        "pod": {
+          "type": "object",
+          "description": "Global pod-level security context applied to all pods. Example: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }",
+          "additionalProperties": true
+        },
+        "container": {
+          "type": "object",
+          "description": "Global container-level security context applied to all containers. Example: { allowPrivilegeEscalation: false, capabilities: { drop: [ALL] } }",
+          "additionalProperties": true
+        },
+        "components": {
+          "type": "object",
+          "description": "Per-component security context overrides. Keys correspond to component names (backend, website, keycloak, silo, lapis, silo-importer, preprocessing, ena-submission, ingest, taxonomy-service, autoapprove, docs, minio, etc.). Each component can specify pod and/or container security contexts that override the global defaults.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "pod": {
+                "type": "object",
+                "description": "Pod-level security context for this component",
+                "additionalProperties": true
+              },
+              "container": {
+                "type": "object",
+                "description": "Container-level security context for this component",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
     "localHost": {
       "groups": ["general"],
       "type": "string",

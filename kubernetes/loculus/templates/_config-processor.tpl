@@ -52,6 +52,9 @@
         secretKeyRef:
           name: orcid
           key: orcidSecret
+  {{- if and .componentName .Values }}
+  {{- include "loculus.containerSecurityContext" (dict "componentName" .componentName "Values" .Values) | nindent 2 }}
+  {{- end }}
 {{- end }}
 
 

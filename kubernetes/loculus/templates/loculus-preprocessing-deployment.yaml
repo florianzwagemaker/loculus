@@ -35,11 +35,13 @@ spec:
     spec:
       {{- include "possiblePriorityClassName" $ | nindent 6 }}
       {{- include "loculus.podScheduling" $ | nindent 6 }}
+      {{- include "loculus.podSecurityContext" (dict "componentName" "preprocessing" "Values" $.Values) | nindent 6 }}
       containers:
         - name: preprocessing-{{ $organism }}
           image: {{ $processingConfig.image}}:{{ $thisDockerTag }}
           imagePullPolicy: {{ $.Values.imagePullPolicy }}
           {{- include "loculus.resources" (list "preprocessing" $.Values) | nindent 10 }}
+          {{- include "loculus.containerSecurityContext" (dict "componentName" "preprocessing" "Values" $.Values) | nindent 10 }}
           env:
             - name: KEYCLOAK_PASSWORD
               valueFrom:

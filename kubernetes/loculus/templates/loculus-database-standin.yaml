@@ -25,9 +25,11 @@ spec:
         component: database
     spec:
       {{- include "loculus.podScheduling" . | nindent 6 }}
+      {{- include "loculus.podSecurityContext" (dict "componentName" "database" "Values" .Values) | nindent 6 }}
       containers:
       - name: database
         image: postgres:15.12
+        {{- include "loculus.containerSecurityContext" (dict "componentName" "database" "Values" .Values) | nindent 8 }}
         args:
           - "-c"
           - "shared_preload_libraries=pg_stat_statements"
